@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
-import cors from "cors";              // ✅ 1. import cors
+import cors from "cors";
+import path from "path";
 import connectDB from "./config/db.js";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -11,23 +12,44 @@ dotenv.config();
 connectDB();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-/* 🔥 CORS MUST BE HERE */
-app.use(
-  cors({
-    origin: "http://localhost:5173",  // frontend
-    credentials: true
-  })
-);
+/* ===== MIDDLEWARE ===== */
 
-app.use(express.json());              // AFTER cors
+// CORS only needed in development
+if (process.env.NODE_ENV === "development") {
+  app.use(
+    cors({
+      origin: "http://localhost:5173",
+      credentials: true
+    })
+  );
+}
+
+app.use(express.json());
+
+/* ===== API ROUTES ===== */
 
 app.use("/api/auth", authRoutes);
 app.use("/api/doctors", doctorRoutes);
 app.use("/api/appointments", appointmentRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Backend is running");
-});
+/* ===== PRODUCTION: SERVE FRONTEND ===== */
 
-export default app;
+if (process.env.NODE_ENV === "production") {
+  const __dirname = path.resolve();
+
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(
+      path.join(__dirname, "../frontend/dist/index.html")
+    );
+  });
+}
+
+/* ===== SERVER START ===== */
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
