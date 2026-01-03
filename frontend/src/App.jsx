@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Doctors from "./pages/Doctors";
 import Navbar from "./components/Navbar";
 
@@ -15,12 +16,19 @@ function App() {
 
   return (
     <BrowserRouter>
-      {/* Navbar with search */}
       <Navbar onSearch={setSearch} />
 
       <Routes>
+        {/* 🔹 FIRST PAGE */}
+        <Route path="/" element={<Navigate to="/register" />} />
+
+        {/* 🔹 REGISTER PAGE */}
+        <Route path="/register" element={<Register />} />
+
+        {/* 🔹 LOGIN PAGE */}
         <Route path="/login" element={<Login />} />
 
+        {/* 🔹 PROTECTED PAGE */}
         <Route
           path="/doctors"
           element={
@@ -30,7 +38,8 @@ function App() {
           }
         />
 
-        <Route path="*" element={<Navigate to="/doctors" />} />
+        {/* 🔹 FALLBACK */}
+        <Route path="*" element={<Navigate to="/register" />} />
       </Routes>
     </BrowserRouter>
   );
